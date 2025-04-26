@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.JavascriptExecutor;
@@ -23,16 +24,16 @@ public class FirstTest {
 		WebDriver driver;
 		System.setProperty("webdriver.chrome.driver", "C:\\Users\\Administrator\\Documents\\Sonali\\Softwares\\chromedriver-win64\\chromedriver.exe");
 		driver = new ChromeDriver();
-		//WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 		driver.get("https://www.cloudbees.com/");
 		driver.findElement(By.id("onetrust-accept-btn-handler")).click();
-		//driver.manage().addCookie(new Cookie(null, null));
+
 		driver.manage().window().maximize();
 		driver.findElement(By.xpath("//button[text()='Products']")).click();
 		driver.findElement(By.xpath("//*[@id=\"subcategory-item-0__CloudBees CD/RO\"]")).click();
-		
+
 		WebElement knownElement = driver.findElement(By.xpath("//*[@data-test=\"stat.preTitle\"]"));
-		
+
 		WebElement toBeVerifiedElement = driver.findElement(RelativeLocator.with(By.tagName("span")).below(knownElement));
 		String str = toBeVerifiedElement.getText();
 		Assert.assertEquals("$2m", str, "The values do not match!");
@@ -47,36 +48,56 @@ public class FirstTest {
 				break;
 			}
 		}
-		
+
 		System.out.println("Scrolled down till expected label");
-        expectedLabel.click();
-        
-        List<WebElement>knownElements = driver.findElements(By.xpath("//*[@data-test=\"headerContent.preTitle\"]"));
-        for(WebElement label:knownElements) {
+		expectedLabel.click();
+
+		List<WebElement>knownElements = driver.findElements(By.xpath("//*[@data-test=\"headerContent.preTitle\"]"));
+		for(WebElement label:knownElements) {
 			if(label.getText().equals("Release Governance")) {
 				System.out.println("label is:"+label.getText());
 				expectedLabel = label;
 				break;
 			}
 		}
-        js.executeScript("arguments[0].scrollIntoView(true);", expectedLabel);
-        toBeVerifiedElement = driver.findElement(RelativeLocator.with(By.tagName("h4")).below(expectedLabel));
-        Assert.assertEquals(toBeVerifiedElement.getText(), "Generate single-click audit reports","Information do not match!");
-        
-        driver.findElement(By.xpath("//button[text()='Resources']")).click();
-        WebElement linkElement = driver.findElement(By.linkText("Documentation"));
-        
-        String originalWindow = driver.getWindowHandle();
+		js.executeScript("arguments[0].scrollIntoView(true);", expectedLabel);
+		toBeVerifiedElement = driver.findElement(RelativeLocator.with(By.tagName("h4")).below(expectedLabel));
+		Assert.assertEquals(toBeVerifiedElement.getText(), "Generate single-click audit reports","Information do not match!");
 
-        linkElement.click();
-        List<String> windowHandles = new ArrayList<>(driver.getWindowHandles());
-        String newTab = "";
-        for (String handle : windowHandles) {
-            if (!handle.equals(originalWindow)) {
-                newTab = handle;
-                break;
-            }
+		driver.findElement(By.xpath("//button[text()='Resources']")).click();
+		WebElement linkElement = driver.findElement(By.linkText("Documentation"));
+
+		String originalWindow = driver.getWindowHandle();
+
+		linkElement.click();
+		List<String> windowHandles = new ArrayList<>(driver.getWindowHandles());
+		String newTab = "";
+		for (String handle : windowHandles) {
+			if (!handle.equals(originalWindow)) {
+				newTab = handle;
+				break;
+			}
+		}
+		driver.switchTo().window(newTab);
+		driver.findElement(By.xpath("//*[@placeholder=\"Search all CloudBees Resources\"]")).click();
+
+		driver.findElement(By.xpath("//*[@type=\"text\"]")).sendKeys("Installation");
+		By locator = By.xpath("//*[@class=\"search-results-container mt-5 \"]");
+		wait.until(ExpectedConditions.visibilityOf(driver.findElement(locator)));
+		expectedLabel = driver.findElement(By.xpath("//*[@class=\"btn btn-link p-0\"]"));
+		
+		try {
+            Thread.sleep(2000); // Adjust as needed
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
+		js.executeScript("arguments[0].scrollIntoView(true);", expectedLabel);
+
+		expectedLabel = driver.findElement(By.xpath("//*[@class=\"page-link\"]"));
+		Assert.assertNotNull(expectedLabel, "Pagination is not present!");
+		Assert.assertTrue(expectedLabel.isDisplayed(), "Pagination is not present!");
+
 	}
 
 }
