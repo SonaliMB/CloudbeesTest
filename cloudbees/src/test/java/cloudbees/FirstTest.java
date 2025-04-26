@@ -23,6 +23,8 @@ public class FirstTest {
 		driver.findElement(By.xpath("//button[text()='Products']")).click();
 		WebElement cs = driver.findElement(By.xpath("//*[@id=\"subcategory-item-0__CloudBees CD/RO\"]"));
 		String str = cs.getText();
+		if(str.equals("2M"))
+			System.out.println("Matched!");
 	}
 
 }
